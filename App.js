@@ -1,10 +1,14 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import StackNavigator from './StackNavigator';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function App() {
   return (
-    <View className="flex flex-1 justify-center items-center" >
-      <Text className='text-3xl'>sdaasd</Text>
-    </View>
+    <NavigationContainer>
+      <SafeAreaView className="flex-1 bg-slate-600">
+        <StackNavigator />
+      </SafeAreaView>
+    </NavigationContainer>
   );
 }
 
