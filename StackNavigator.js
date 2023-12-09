@@ -4,6 +4,7 @@ import LoginScreen from './screens/LoginScreen'
 import MainScreen from './screens/MainScreen';
 import PaymentScreen from './screens/PaymentScreen';
 import RegisterScreen from './screens/RegisterScreen';
+import ForgotPassScreen from './screens/ForgotPassScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -35,6 +36,7 @@ const StackNavigator = () => {
                 <Stack.Group>
                     <Stack.Screen name="Login" component={LoginScreen} />
                     <Stack.Screen name="Register" component={RegisterScreen} />
+                    <Stack.Screen name="Forgot" component={ForgotPassScreen} />
                 </Stack.Group>
             )}
         </Stack.Navigator>

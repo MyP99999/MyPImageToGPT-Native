@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function App() {
   return (
     <NavigationContainer>
-      <SafeAreaView className="flex-1 bg-slate-600">
+      <SafeAreaView className="flex-1 bg-slate-800">
         <StackNavigator />
       </SafeAreaView>
     </NavigationContainer>

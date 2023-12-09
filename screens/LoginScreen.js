@@ -26,8 +26,8 @@ const LoginScreen = () => {
   }, [fadeAnim]);
 
   return (
-    <SafeAreaView className="bg-slate-600 flex flex-1 justify-center items-center">
-      <Animated.View className="flex w-full h-full bg-slate-900 justify-between items-center px-8 py-16 rounded-md"
+    <SafeAreaView className="bg-slate-700 flex flex-1 justify-center items-center">
+      <Animated.View className="flex w-full h-full bg-slate-900 justify-between items-center px-8 py-16"
         style={{
           opacity: fadeAnim,
         }}
@@ -38,26 +38,26 @@ const LoginScreen = () => {
         </View>
         <View className="w-full">
           <TextInput
-            className="text-white w-full mb-4 p-4 bg-gray-700 rounded-lg"
+            className="text-white w-full mb-4 p-4 bg-gray-700 rounded-2xl"
             placeholder="Enter your email"
             placeholderTextColor="#ccc"
             value={email}
             onChangeText={setEmail}
           />
           <TextInput
-            className="text-white w-full mb-8 p-4 bg-gray-700 rounded-lg"
+            className="text-white w-full mb-8 p-4 bg-gray-700 rounded-2xl"
             placeholder="Enter your password"
             placeholderTextColor="#ccc"
             secureTextEntry={true}
             value={password}
             onChangeText={setPassword}
           />
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigate.navigate('Forgot')}>
             <Text className="text-gray-400 text-right">Forgot Password?</Text>
           </TouchableOpacity>
         </View>
         <View className="w-full flex items-center">
-          <TouchableOpacity className="bg-blue-500 rounded-lg w-full" title="Login" onPress={handleLogin}>
+          <TouchableOpacity className="bg-blue-500 rounded-xl w-full" title="Login" onPress={handleLogin}>
             <Text className="text-lg text-white p-4 text-center">Sign In</Text>
           </TouchableOpacity>
           <Text className="text-xl text-white mt-8">or</Text>
