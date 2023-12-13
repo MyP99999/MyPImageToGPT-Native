@@ -3,34 +3,40 @@ import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import googlePng from '../assets/google.png'
 import { useNavigation } from '@react-navigation/native';
+import { useAuth } from '../context/useAuth';
+import axiosInstance from '../api/axios';
+import axios from 'axios';
 
 const LoginScreen = () => {
   const navigate = useNavigation()
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const fadeAnim = new Animated.Value(0); // Initial value for opacity: 0
+  const { login } = useAuth();
 
-  const handleLogin = () => {
-    // Implement your login logic here
-    console.log('Email: ', email, 'Password: ', password);
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post('http://localhost:8080/api/auth/authenticate', {
+        username: email,
+        password
+      });
+      console.log(response)
+      const data = response.data;
+      const user = jwtDecode(data.token); // Decode JWT to get user data
+      login(user, { accessToken: data.token, refreshToken: data.refreshToken });
+      navigate.navigate('Main');
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Error logging in';
+      console.error('Login error:', errorMessage);
+      alert(errorMessage);
+    }
   };
-  useEffect(() => {
-    Animated.timing(
-      fadeAnim,
-      {
-        toValue: 1,
-        duration: 1000,
-        useNativeDriver: true,
-      }
-    ).start();
-  }, [fadeAnim]);
+
+
 
   return (
     <SafeAreaView className="bg-slate-700 flex flex-1 justify-center items-center">
       <Animated.View className="flex w-full h-full bg-slate-900 justify-between items-center px-8 py-16"
-        style={{
-          opacity: fadeAnim,
-        }}
       >
         <View>
           <Text className="text-xl text-white text-center">Welcome Back!</Text>
@@ -57,7 +63,7 @@ const LoginScreen = () => {
           </TouchableOpacity>
         </View>
         <View className="w-full flex items-center">
-          <TouchableOpacity className="bg-blue-500 rounded-xl w-full" title="Login" onPress={handleLogin}>
+          <TouchableOpacity className="bg-blue-500 rounded-xl w-full" title="Login" onPress={handleSubmit}>
             <Text className="text-lg text-white p-4 text-center">Sign In</Text>
           </TouchableOpacity>
           <Text className="text-xl text-white mt-8">or</Text>
