@@ -23,7 +23,7 @@ const ForgotPassScreen = () => {
                 useNativeDriver: true,
             }
         ).start();
-    }, [fadeAnim]);
+    }, []);
 
     return (
         <SafeAreaView className="bg-slate-700 flex flex-1 justify-center items-center">

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import 'core-js/stable/atob';
 import {jwtDecode} from 'jwt-decode'; // Correct import statement for jwt-decode
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';

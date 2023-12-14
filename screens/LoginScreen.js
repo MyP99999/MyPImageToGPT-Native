@@ -23,9 +23,8 @@ const LoginScreen = () => {
         password: password
       });
       const data = response.data;
-      console.log(data.token)
       const user = jwtDecode(data.token); // Decode JWT to get user data
-      console.log(user)
+     
       login(user, { accessToken: data.token, refreshToken: data.refreshToken });
     } catch (error) {
       console.error('Error details:', error);

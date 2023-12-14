@@ -11,7 +11,7 @@ export default function App() {
       <AuthProvider>
         <TokensProvider>
           <HistoryProvider>
-            <SafeAreaView className="flex-1 bg-slate-800">
+            <SafeAreaView className="flex-1 bg-slate-600">
               <StackNavigator />
             </SafeAreaView>
           </HistoryProvider>
