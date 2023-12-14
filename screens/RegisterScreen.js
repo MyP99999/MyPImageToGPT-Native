@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import googlePng from '../assets/google.png'
 import { useNavigation } from '@react-navigation/native';
+import axiosInstance from '../api/axios';
 
 const RegisterScreen = () => {
   const navigate = useNavigation()
@@ -11,20 +12,36 @@ const RegisterScreen = () => {
   const [password, setPassword] = useState('');
   const fadeAnim = new Animated.Value(0); // Initial value for opacity: 0
 
-  const handleRegister = () => {
-    // Implement your login logic here
-    console.log('Email: ', email, 'Password: ', password);
+  const handleRegister = async () => {
+    try {
+      const response = await axiosInstance.post('/api/auth/register', {
+        username,
+        email,
+        password
+      });
+      if (response.status === 200 || response.status === 201) { // Check for successful response status
+        alert("You have received an email to activate the account!")
+      } else {
+        // Handle errors, show messages to user
+        console.error('Registration failed');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      alert('An error occurred during registration.');
+    }
   };
+
+  
   useEffect(() => {
     Animated.timing(
       fadeAnim,
       {
         toValue: 1,
-        duration: 100,
+        duration: 500,
         useNativeDriver: true,
       }
     ).start();
-  }, [fadeAnim]);
+  }, []);
 
   return (
     <SafeAreaView className="bg-slate-700 flex flex-1 justify-center items-center">

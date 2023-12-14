@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import {jwtDecode} from 'jwt-decode'; // Correct import statement for jwt-decode
-import axiosInstance from '../api/axios';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 export const isTokenExpired = (token) => {
   try {
@@ -16,7 +16,7 @@ export const isTokenExpired = (token) => {
 
 export async function refreshAccessToken(refreshToken) {
   try {
-    const response = await axiosInstance.post(
+    const response = await axios.post(
       '/api/auth/refresh-token?refreshToken=' + refreshToken
     );
     const { token } = response.data;

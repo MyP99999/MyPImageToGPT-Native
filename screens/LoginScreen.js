@@ -27,17 +27,24 @@ const LoginScreen = () => {
       const user = jwtDecode(data.token); // Decode JWT to get user data
       console.log(user)
       login(user, { accessToken: data.token, refreshToken: data.refreshToken });
-      navigate.navigate('Main');
     } catch (error) {
       console.error('Error details:', error);
       const errorMessage = error.response?.data?.message || 'Error logging in';
       console.error('Login error:', errorMessage);
       alert(errorMessage);
     }
-    
   };
 
-
+  useEffect(() => {
+    Animated.timing(
+      fadeAnim,
+      {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }
+    ).start();
+  }, []);
 
   return (
     <SafeAreaView className="bg-slate-700 flex flex-1 justify-center items-center">
