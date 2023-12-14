@@ -11,12 +11,11 @@ export const HistoryProvider = ({ children }) => {
     const { user } = useAuth();
     const [history, setHistory] = useState([]);
     const [open, setOpen] = useState(false); // State to control the visibility
-    const navigate = useNavigation()
 
     useEffect(() => {
         const fetchHistory = async () => {
             try {
-                const response = await axiosInstance.get(`http://localhost:8080/history/user/${user?.id}`);
+                const response = await axiosInstance.get(`/history/user/${user?.id}`);
                 setHistory(response.data);
             } catch (error) {
                 console.log(error);
@@ -28,7 +27,7 @@ export const HistoryProvider = ({ children }) => {
 
     const fetchHistory = async () => {
         try {
-            const response = await axiosInstance.get(`http://localhost:8080/history/user/${user?.id}`);
+            const response = await axiosInstance.get(`/history/user/${user?.id}`);
             setHistory(response.data);
         } catch (error) {
             console.log(error);
@@ -37,7 +36,7 @@ export const HistoryProvider = ({ children }) => {
 
     const fetchHistoryById = async (historyID) => {
         try {
-            const response = await axiosInstance.get(`http://localhost:8080/history/user/${user?.id}/${historyID}`);
+            const response = await axiosInstance.get(`/history/user/${user?.id}/${historyID}`);
             return response
         } catch (error) {
             console.log(error);
