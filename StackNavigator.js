@@ -5,12 +5,13 @@ import MainScreen from './screens/MainScreen';
 import PaymentScreen from './screens/PaymentScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import ForgotPassScreen from './screens/ForgotPassScreen';
+import { useAuth } from './context/useAuth';
 
 const Stack = createNativeStackNavigator();
 
 const StackNavigator = () => {
 
-    const { user } = false;
+    const { user } = useAuth();
 
     return (
         <Stack.Navigator

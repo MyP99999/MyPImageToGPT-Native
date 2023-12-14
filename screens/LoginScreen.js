@@ -5,7 +5,8 @@ import googlePng from '../assets/google.png'
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/useAuth';
 import axiosInstance from '../api/axios';
-import axios from 'axios';
+import 'core-js/stable/atob';
+import { jwtDecode } from 'jwt-decode';
 
 const LoginScreen = () => {
   const navigate = useNavigation()
@@ -14,22 +15,26 @@ const LoginScreen = () => {
   const fadeAnim = new Animated.Value(0); // Initial value for opacity: 0
   const { login } = useAuth();
 
+  
   const handleSubmit = async () => {
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/authenticate', {
+      const response = await axiosInstance.post('/api/auth/authenticate', {
         username: email,
-        password
+        password: password
       });
-      console.log(response)
       const data = response.data;
+      console.log(data.token)
       const user = jwtDecode(data.token); // Decode JWT to get user data
+      console.log(user)
       login(user, { accessToken: data.token, refreshToken: data.refreshToken });
       navigate.navigate('Main');
     } catch (error) {
+      console.error('Error details:', error);
       const errorMessage = error.response?.data?.message || 'Error logging in';
       console.error('Login error:', errorMessage);
       alert(errorMessage);
     }
+    
   };
 
 

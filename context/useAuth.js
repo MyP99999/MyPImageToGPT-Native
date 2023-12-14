@@ -17,7 +17,7 @@ export const isTokenExpired = (token) => {
 export async function refreshAccessToken(refreshToken) {
   try {
     const response = await axiosInstance.post(
-      'http://localhost:8080/api/auth/refresh-token?refreshToken=' + refreshToken
+      '/api/auth/refresh-token?refreshToken=' + refreshToken
     );
     const { token } = response.data;
     await AsyncStorage.setItem('accessToken', token);
