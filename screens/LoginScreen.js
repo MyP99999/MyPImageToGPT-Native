@@ -7,15 +7,26 @@ import { useAuth } from '../context/useAuth';
 import axiosInstance from '../api/axios';
 import 'core-js/stable/atob';
 import { jwtDecode } from 'jwt-decode';
+import {
+  GoogleSignin,
+  GoogleSigninButton,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
+
 
 const LoginScreen = () => {
+  GoogleSignin.configure({
+    scopes: ['https://www.googleapis.com/auth/drive.readonly'], // what API you want to access on behalf of the user, default is email and profile
+    webClientId: '395725889654-d7s1b1bo6jfcc88v7lud9no33a2v6hoe.apps.googleusercontent.com', // client ID of type WEB for your server (needed to verify user ID and offline access)
+  });
+
   const navigate = useNavigation()
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const fadeAnim = new Animated.Value(0); // Initial value for opacity: 0
   const { login } = useAuth();
 
-  
+
   const handleSubmit = async () => {
     try {
       const response = await axiosInstance.post('/api/auth/authenticate', {
@@ -24,7 +35,7 @@ const LoginScreen = () => {
       });
       const data = response.data;
       const user = jwtDecode(data.token); // Decode JWT to get user data
-     
+
       login(user, { accessToken: data.token, refreshToken: data.refreshToken });
     } catch (error) {
       console.error('Error details:', error);
@@ -33,6 +44,34 @@ const LoginScreen = () => {
       alert(errorMessage);
     }
   };
+
+  const onGoogleLogin = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      console.log(userInfo)
+      // const { idToken } = userInfo;
+      // const response = await axiosInstance.post('/api/auth/google', { idToken });
+      // if (response.status === 201) {
+      //   // Store user data in AsyncStorage for future sessions.
+      //   await AsyncStorage.setItem('userToken', JSON.stringify(response.data));
+      //   setUser(response.data);
+      //   return response.data;
+      // } else {
+      //   throw new Error(response.data.error || 'Failed to login.');
+      // }
+    } catch (error) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        // user cancelled the login flow
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        // operation (e.g. sign in) is in progress already
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        // play services not available or outdated
+      } else {
+        // some other error happened
+      }
+    }
+  }
 
   useEffect(() => {
     Animated.timing(
@@ -80,7 +119,11 @@ const LoginScreen = () => {
           <Text className="text-xl text-white mt-8">or</Text>
           <Text className="text-xl text-white mt-8">Sign in with Google</Text>
           <TouchableOpacity>
-            <Image source={googlePng} className="h-12 w-12 my-4" />
+            <GoogleSigninButton
+              size={GoogleSigninButton.Size.Wide}
+              color={GoogleSigninButton.Color.Dark}
+              onPress={onGoogleLogin}
+            />;
           </TouchableOpacity>
           <View className="flex flex-row justify-center items-center gap-1">
             <Text className="text-lg text-white">Don't Have An Account?</Text>

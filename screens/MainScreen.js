@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, ScrollView, Image, TextInput } from 'react-native'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '../context/useAuth'
 import Navbar from '../components/Navbar'
 import { useHistory } from '../context/useHistory'
@@ -37,12 +37,8 @@ const MainScreen = () => {
     setResult('');
     if (tokens >= price) {
       // setLoading(true);
+      console.log(model)
       try {
-        // Make a GET request
-        console.log(inputValue)
-        console.log(user.id)
-        console.log(price)
-        console.log(model)
         const response = await axiosInstance.get('/bot/chat', {
           params: {
             prompt: inputValue,
@@ -79,6 +75,11 @@ const MainScreen = () => {
     return price;
   }, []);
 
+  useEffect(() => {
+    setPrice(calculatePrice(inputValue, model));
+  }, [inputValue, model, calculatePrice]);
+
+
   return (
     <View className="h-full w-full">
       <Navbar />
@@ -97,7 +98,7 @@ const MainScreen = () => {
                   onSelect={handleModelChange}
                   setSelected={setModel}
                   placeholder="Select a model"
-                  defaultOption={modelOptions.find(option => option.key === model)} // To set default selection based on current state
+                  defaultOption='gpt-3.5-turbo-1106'
                   boxStyles={{ position: 'relative', backgroundColor: 'black', borderRadius: 5, borderWidth: 1, borderColor: '#fff' }}
                   inputStyles={{ color: 'white' }}
                   dropdownStyles={{
@@ -120,11 +121,11 @@ const MainScreen = () => {
                 <Image source={coin} className='w-4 h-4' alt="add" />
               </View>
             </View>
-            <View className="flex-1 border-2 mt-8  mx-2 border-gray-700 bg-gray-700 rounded-lg">
+            <View className="flex-1 border-2 mt-8 mx-2 border-gray-700 bg-gray-700 rounded-lg">
               <TextInput
                 value={inputValue}
                 onChangeText={setInputValue}
-                className="h-full w-full text-white font-semibold "
+                className="h-full w-full text-white font-semibold p-2"
                 textAlignVertical="top"
                 multiline
               />

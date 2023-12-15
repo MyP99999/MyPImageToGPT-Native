@@ -1,10 +1,25 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { refreshAccessToken } from '../context/useAuth';
 // import { isTokenExpired, refreshAccessToken } from '../context/useAuth'; // Correct path
 
 const axiosInstance = axios.create({
   baseURL: 'http://192.168.1.9:8080', // Backend base URL
 });
+
+
+export async function refreshAccessToken(refreshToken) {
+  try {
+    const response = await axiosInstance.post(
+      '/api/auth/refresh-token?refreshToken=' + refreshToken
+    );
+    const { token } = response.data;
+    await AsyncStorage.setItem('accessToken', token);
+    return token;
+  } catch (error) {
+    console.error('Error refreshing access token:', error);
+    throw error;
+  }
+}
 
 axiosInstance.interceptors.response.use(
   response => response,
