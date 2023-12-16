@@ -12,12 +12,15 @@ import {
   GoogleSigninButton,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
+import * as Google from "expo-auth-session/providers/google";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const LoginScreen = () => {
   GoogleSignin.configure({
     scopes: ['https://www.googleapis.com/auth/drive.readonly'], // what API you want to access on behalf of the user, default is email and profile
     webClientId: '395725889654-d7s1b1bo6jfcc88v7lud9no33a2v6hoe.apps.googleusercontent.com', // client ID of type WEB for your server (needed to verify user ID and offline access)
+    androidClientId: '395725889654-nfgjk3jk44phk9ib9od38uc4uevreoj3.apps.googleusercontent.com'
   });
 
   const navigate = useNavigation()
@@ -46,12 +49,16 @@ const LoginScreen = () => {
   };
 
   const onGoogleLogin = async () => {
+    console.log('first')
     try {
       await GoogleSignin.hasPlayServices();
+      console.log('sec')
       const userInfo = await GoogleSignin.signIn();
       console.log(userInfo)
-      // const { idToken } = userInfo;
-      // const response = await axiosInstance.post('/api/auth/google', { idToken });
+      const { idToken } = userInfo;
+      console.log(idToken)
+      const response = await axiosInstance.post('/api/auth/google', { idToken });
+      console.log(response)
       // if (response.status === 201) {
       //   // Store user data in AsyncStorage for future sessions.
       //   await AsyncStorage.setItem('userToken', JSON.stringify(response.data));
@@ -83,6 +90,62 @@ const LoginScreen = () => {
       }
     ).start();
   }, []);
+
+
+
+
+
+  const [token, setToken] = useState("");
+  const [userInfo, setUserInfo] = useState(null);
+
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    androidClientId: "395725889654-nfgjk3jk44phk9ib9od38uc4uevreoj3.apps.googleusercontent.com",
+    iosClientId: "",
+    webClientId: "395725889654-d7s1b1bo6jfcc88v7lud9no33a2v6hoe.apps.googleusercontent.com",
+  });
+
+  useEffect(() => {
+    handleEffect();
+  }, [response, token]);
+
+  async function handleEffect() {
+    const user = await getLocalUser();
+    if (!user) {
+      if (response?.type === "success") {
+        console.log(response)
+        setToken(response.authentication.accessToken);
+        console.log(token)
+        // getUserInfo(response.authentication.accessToken);
+      }
+    } else {
+      setUserInfo(user);
+      console.log("loaded locally");
+    }
+  }
+
+  const getLocalUser = async () => {
+    const data = null;
+    if (!data) return null;
+    return JSON.parse(data);
+  };
+
+  const getUserInfo = async (token) => {
+    if (!token) return;
+    try {
+      const response = await fetch(
+        "https://www.googleapis.com/userinfo/v2/me",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log(response)
+      const user = await response.json();
+      await AsyncStorage.setItem("@user", JSON.stringify(user));
+      setUserInfo(user);
+    } catch (error) {
+      // Add your own error handler here
+    }
+  };
 
   return (
     <SafeAreaView className="bg-slate-700 flex flex-1 justify-center items-center">
@@ -118,13 +181,14 @@ const LoginScreen = () => {
           </TouchableOpacity>
           <Text className="text-xl text-white mt-8">or</Text>
           <Text className="text-xl text-white mt-8">Sign in with Google</Text>
-          <TouchableOpacity>
-            <GoogleSigninButton
-              size={GoogleSigninButton.Size.Wide}
-              color={GoogleSigninButton.Color.Dark}
-              onPress={onGoogleLogin}
-            />;
-          </TouchableOpacity>
+          <Button
+            title="Sign in with Google"
+            disabled={!request}
+            onPress={() => {
+              promptAsync();
+            }}
+          />
+
           <View className="flex flex-row justify-center items-center gap-1">
             <Text className="text-lg text-white">Don't Have An Account?</Text>
             <TouchableOpacity onPress={() => navigate.navigate('Register')}>

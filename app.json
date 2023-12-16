@@ -15,18 +15,21 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier" : "com.myp99999.mypimagetogptnative"
     },
     "android": {
+      "bundleIdentifier" : "com.myp99999.mypimagetogptnative",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#1E2225"
       },
       "package": "com.myp99999.mypimagetogptnative"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/logo.png"
     },
+    "scheme": "mypimagetogpt-native",
     "extra": {
       "eas": {
         "projectId": "cffd85ae-e7a7-40ed-ac18-541ae3bc1262"

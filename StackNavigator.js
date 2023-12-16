@@ -6,6 +6,8 @@ import PaymentScreen from './screens/PaymentScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import ForgotPassScreen from './screens/ForgotPassScreen';
 import { useAuth } from './context/useAuth';
+import { enableScreens } from 'react-native-screens';
+enableScreens(true);
 
 const Stack = createNativeStackNavigator();
 
