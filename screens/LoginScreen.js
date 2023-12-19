@@ -7,28 +7,14 @@ import { useAuth } from '../context/useAuth';
 import axiosInstance from '../api/axios';
 import 'core-js/stable/atob';
 import { jwtDecode } from 'jwt-decode';
-import {
-  GoogleSignin,
-  GoogleSigninButton,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
 import * as Google from "expo-auth-session/providers/google";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 
 const LoginScreen = () => {
-  GoogleSignin.configure({
-    scopes: ['https://www.googleapis.com/auth/drive.readonly'], // what API you want to access on behalf of the user, default is email and profile
-    webClientId: '395725889654-d7s1b1bo6jfcc88v7lud9no33a2v6hoe.apps.googleusercontent.com', // client ID of type WEB for your server (needed to verify user ID and offline access)
-    androidClientId: '395725889654-nfgjk3jk44phk9ib9od38uc4uevreoj3.apps.googleusercontent.com'
-  });
-
   const navigate = useNavigation()
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const fadeAnim = new Animated.Value(0); // Initial value for opacity: 0
   const { login } = useAuth();
-
 
   const handleSubmit = async () => {
     try {
@@ -48,38 +34,6 @@ const LoginScreen = () => {
     }
   };
 
-  const onGoogleLogin = async () => {
-    console.log('first')
-    try {
-      await GoogleSignin.hasPlayServices();
-      console.log('sec')
-      const userInfo = await GoogleSignin.signIn();
-      console.log(userInfo)
-      const { idToken } = userInfo;
-      console.log(idToken)
-      const response = await axiosInstance.post('/api/auth/google', { idToken });
-      console.log(response)
-      // if (response.status === 201) {
-      //   // Store user data in AsyncStorage for future sessions.
-      //   await AsyncStorage.setItem('userToken', JSON.stringify(response.data));
-      //   setUser(response.data);
-      //   return response.data;
-      // } else {
-      //   throw new Error(response.data.error || 'Failed to login.');
-      // }
-    } catch (error) {
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        // user cancelled the login flow
-      } else if (error.code === statusCodes.IN_PROGRESS) {
-        // operation (e.g. sign in) is in progress already
-      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        // play services not available or outdated
-      } else {
-        // some other error happened
-      }
-    }
-  }
-
   useEffect(() => {
     Animated.timing(
       fadeAnim,
@@ -91,62 +45,49 @@ const LoginScreen = () => {
     ).start();
   }, []);
 
-
-
-
-
-  const [token, setToken] = useState("");
-  const [userInfo, setUserInfo] = useState(null);
-
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId: "395725889654-nfgjk3jk44phk9ib9od38uc4uevreoj3.apps.googleusercontent.com",
     iosClientId: "",
     webClientId: "395725889654-d7s1b1bo6jfcc88v7lud9no33a2v6hoe.apps.googleusercontent.com",
+    offlineAccess: true,
+    scopes: ['https://www.googleapis.com/auth/drive.readonly'], // what API you want to access on behalf of the user, default is email and profile
+
   });
 
-  useEffect(() => {
-    handleEffect();
-  }, [response, token]);
-
-  async function handleEffect() {
-    const user = await getLocalUser();
-    if (!user) {
-      if (response?.type === "success") {
-        console.log(response)
-        setToken(response.authentication.accessToken);
-        console.log(token)
-        // getUserInfo(response.authentication.accessToken);
-      }
-    } else {
-      setUserInfo(user);
-      console.log("loaded locally");
-    }
-  }
-
-  const getLocalUser = async () => {
-    const data = null;
-    if (!data) return null;
-    return JSON.parse(data);
-  };
-
-  const getUserInfo = async (token) => {
-    if (!token) return;
+  const onGoogleLogin = async () => {
     try {
-      const response = await fetch(
-        "https://www.googleapis.com/userinfo/v2/me",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      console.log(response)
-      const user = await response.json();
-      await AsyncStorage.setItem("@user", JSON.stringify(user));
-      setUserInfo(user);
+      await promptAsync();
     } catch (error) {
-      // Add your own error handler here
+      console.error('Google Sign-In initiation error:', error);
     }
   };
-
+  
+  useEffect(() => {
+    const handleGoogleResponse = async () => {
+      if (response?.type === 'success') {
+        try {
+          const token = response.authentication.accessToken;
+          console.log(token)
+          const res = await axiosInstance.post(`/api/auth/googleNative?code=${token}`);
+          console.log(res)
+          if (res.data.token) {
+            const user = jwtDecode(res.data.token);
+            login(user, { accessToken: res.data.token, refreshToken: res.data.refreshToken });
+            navigate.navigate('Home');
+          } else {
+            console.error('Failed to log in');
+          }
+        } catch (error) {
+          console.error('Google Sign-In processing error:', error);
+        }
+      }
+    };
+  
+    if (response) {
+      handleGoogleResponse();
+    }
+  }, [response]); // This useEffect will run whenever 'response' changes
+  
   return (
     <SafeAreaView className="bg-slate-700 flex flex-1 justify-center items-center">
       <Animated.View className="flex w-full h-full bg-slate-900 justify-between items-center px-8 py-16"
@@ -181,13 +122,16 @@ const LoginScreen = () => {
           </TouchableOpacity>
           <Text className="text-xl text-white mt-8">or</Text>
           <Text className="text-xl text-white mt-8">Sign in with Google</Text>
-          <Button
-            title="Sign in with Google"
-            disabled={!request}
-            onPress={() => {
-              promptAsync();
-            }}
-          />
+          <Text>
+
+            <Button
+              title="Sign in with Google"
+              // disabled={!request}
+              onPress={
+                onGoogleLogin
+              }
+            />;
+          </Text>
 
           <View className="flex flex-row justify-center items-center gap-1">
             <Text className="text-lg text-white">Don't Have An Account?</Text>
