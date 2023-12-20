@@ -7,6 +7,7 @@ import RegisterScreen from './screens/RegisterScreen';
 import ForgotPassScreen from './screens/ForgotPassScreen';
 import { useAuth } from './context/useAuth';
 import { enableScreens } from 'react-native-screens';
+import HistoryScreen from './screens/HistoryScreen';
 enableScreens(true);
 
 const Stack = createNativeStackNavigator();
@@ -33,6 +34,7 @@ const StackNavigator = () => {
                     <Stack.Group>
                         <Stack.Screen name="Main" component={MainScreen} />
                         <Stack.Screen name="Payment" component={PaymentScreen} />
+                        <Stack.Screen name="History" component={HistoryScreen} />
                     </Stack.Group>
                 </>
             ) : (

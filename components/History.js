@@ -3,11 +3,18 @@ import React from 'react'
 import Logout from './Logout'
 import { useAuth } from '../context/useAuth'
 import { useHistory } from '../context/useHistory'
+import { useNavigation } from '@react-navigation/native'
 
 const History = ({ id }) => {
     const { user } = useAuth()
     const { history } = useHistory()
     const reversedHistory = [...history].reverse();
+    const navigation = useNavigation()
+
+    const handleViewPress = (historyId) => {
+        // Use the passed navigation to navigate to the specific history item
+        navigation.navigate('History', { historyId });
+    };
 
     return (
         <View className="bg-slate-700 flex-1">
@@ -19,7 +26,7 @@ const History = ({ id }) => {
                             <Text className="text-lg text-white">
                                 {item.question.length > 20 ? `${item.question.substring(0, 10)}..` : item.question}
                             </Text>
-                            <TouchableOpacity className="bg-blue-500 hover:bg-blue-700 transition-all ease-in-out duration-300 p-1 rounded-md">
+                            <TouchableOpacity className="bg-blue-500 hover:bg-blue-700 transition-all ease-in-out duration-300 p-1 rounded-md" onPress={() => handleViewPress(item.id)}>
                                 <Text>
                                     View
                                 </Text>

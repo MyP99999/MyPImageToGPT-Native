@@ -6,21 +6,23 @@ import add from "../assets/add.png"
 import { useTokens } from '../context/useTokens'
 import { useHistory } from '../context/useHistory'
 import { useNavigation } from '@react-navigation/native'
+import returnImg from '../assets/returnIcon.png'
 
-const Navbar = () => {
+const Navbar = ({ ret }) => {
     const { tokens } = useTokens()
     const { toggleHistory } = useHistory()
     const navigation = useNavigation();
 
     return (
         <View className="bg-slate-900 h-16 flex flex-row items-center justify-between px-4">
-            <ToggleButton toggleHistory={toggleHistory} />
-            <TouchableOpacity className='bg-blue-400' onPress={() => navigation.navigate('Payment')
-            }>
-                <Text>
-                    ceva
-                </Text>
-            </TouchableOpacity>
+            {ret ? (
+                <TouchableOpacity onPress={() => navigation.navigate('Main')}>
+                    <Image source={returnImg} alt="return" className='w-7 h-7' />
+                </TouchableOpacity>
+            ) : (
+                <ToggleButton toggleHistory={toggleHistory} />
+            )}
+
             <View className='flex flex-row gap-3 items-center'>
                 <Image source={coin} alt="coin" className='w-8 h-8' />
                 <Text className='font-semibold text-yellow-500 text-lg'>{tokens} tokens</Text>
@@ -28,7 +30,7 @@ const Navbar = () => {
                     <Image source={add} className='w-8 h-8' alt="add" />
                 </TouchableOpacity>
             </View>
-        </View>
+        </View >
     )
 }
 
