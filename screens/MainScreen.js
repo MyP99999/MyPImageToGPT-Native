@@ -7,7 +7,8 @@ import History from '../components/History'
 import coin from "../assets/coin.png"
 import { SelectList } from 'react-native-dropdown-select-list'
 import { useTokens } from '../context/useTokens'
-import axiosInstance from '../api/axios'
+import axiosInstance, { refreshAccessToken } from '../api/axios'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 
 const MainScreen = () => {
@@ -17,7 +18,7 @@ const MainScreen = () => {
   const [prompt, setPrompt] = useState('')
   const [price, setPrice] = useState(1)
   const { open, fetchHistory } = useHistory()
-  const { user } = useAuth()
+  const { user, checkToken } = useAuth()
   const { tokens, spendTokens } = useTokens()
 
   const modelOptions = [
@@ -34,11 +35,14 @@ const MainScreen = () => {
   };
 
   async function handleSubmit() {
+    await checkToken();
     setResult('');
     if (tokens >= price) {
       // setLoading(true);
       console.log(model)
       try {
+    
+        
         const response = await axiosInstance.get('/bot/chat', {
           params: {
             prompt: inputValue,

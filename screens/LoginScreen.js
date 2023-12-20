@@ -67,9 +67,7 @@ const LoginScreen = () => {
       if (response?.type === 'success') {
         try {
           const token = response.authentication.accessToken;
-          console.log(token)
           const res = await axiosInstance.post(`/api/auth/googleNative?code=${token}`);
-          console.log(res)
           if (res.data.token) {
             const user = jwtDecode(res.data.token);
             login(user, { accessToken: res.data.token, refreshToken: res.data.refreshToken });
