@@ -16,21 +16,22 @@ export const isTokenExpired = (token) => {
   }
 };
 
-export async function refreshAccessToken(refreshToken) {
-  try {
-    const response = await axiosInstance.post(
-      '/api/auth/refresh-token?refreshToken=' + refreshToken
-    );
-    const { token } = response.data;
-    await AsyncStorage.setItem('accessToken', token);
- 
-    return token;
-  } catch (error) {
-    console.log('eroare')
-    console.error('Error refreshing access token:', error);
-    throw error;
-  }
-}
+// export async function refreshAccessToken(refreshToken) {
+//   try {
+//     const response = await axiosInstance.post(
+//       '/api/auth/refresh-token?refreshToken=' + refreshToken
+//     );
+//     const { token } = response.data;
+//     console.log(token)
+//     await AsyncStorage.setItem('accessToken', token);
+
+//     return token;
+//   } catch (error) {
+//     console.log('eroare')
+//     console.error('Error refreshing access token:', error);
+//     throw error;
+//   }
+// }
 
 const AuthContext = createContext();
 
@@ -40,6 +41,23 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const navigation = useNavigation();
 
+  const refreshAccessToken = async (refreshToken) => {
+    try {
+      const response = await axiosInstance.post(
+        '/api/auth/refresh-token?refreshToken=' + refreshToken
+      );
+      const { token } = response.data;
+      console.log(token)
+      await AsyncStorage.setItem('accessToken', token);
+      setUser(jwtDecode(token));
+
+      return token;
+    } catch (error) {
+      console.log('eroare')
+      console.error('Error refreshing access token:', error);
+      throw error;
+    }
+  }
 
   const checkToken = async () => {
     const accessToken = await AsyncStorage.getItem('accessToken');
@@ -109,7 +127,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, setUser, checkToken }}>
+    <AuthContext.Provider value={{ user, login, logout, setUser, checkToken, refreshAccessToken }}>
       {children}
     </AuthContext.Provider>
   );

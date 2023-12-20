@@ -26,7 +26,7 @@ const Navbar = ({ ret }) => {
             <View className='flex flex-row gap-3 items-center'>
                 <Image source={coin} alt="coin" className='w-8 h-8' />
                 <Text className='font-semibold text-yellow-500 text-lg'>{tokens} tokens</Text>
-                <TouchableOpacity className='text-3xl text-white font-semibold hover:text-yellow-500 hover:scale-125 transition duration-300 ease-in-out'>
+                <TouchableOpacity className='text-3xl text-white font-semibold hover:text-yellow-500 hover:scale-125 transition duration-300 ease-in-out' onPress={() => navigation.navigate('Payment')}>
                     <Image source={add} className='w-8 h-8' alt="add" />
                 </TouchableOpacity>
             </View>
