@@ -15,24 +15,20 @@ const MainScreen = () => {
   const [inputValue, setInputValue] = useState('')
   const [result, setResult] = useState('');
   const [model, setModel] = useState('gpt-3.5-turbo-1106');
-  const [prompt, setPrompt] = useState('')
+  const [prompt, setPrompt] = useState('code')
   const [price, setPrice] = useState(1)
   const { open, fetchHistory } = useHistory()
-  const { user, checkToken } = useAuth()
+  const { user, checkToken } = useAuth();
   const { tokens, spendTokens } = useTokens()
 
   const modelOptions = [
     { key: 'gpt-3.5-turbo-1106', value: 'gpt-3.5' },
     { key: 'gpt-4-1106-preview', value: 'gpt-4' },
   ];
-
-  const handleModelChange = (itemValue) => {
-    setModel(itemValue);
-  };
-
-  const handlePromptChange = (itemValue) => {
-    setPrompt(itemValue);
-  };
+  const promptOptions = [
+    { key: 'code', value: 'code' },
+    { key: 'ceva', value: 'ceva' },
+  ];
 
   async function handleSubmit() {
     await checkToken();
@@ -41,8 +37,6 @@ const MainScreen = () => {
       // setLoading(true);
       console.log(model)
       try {
-    
-        
         const response = await axiosInstance.get('/bot/chat', {
           params: {
             prompt: inputValue,
@@ -73,7 +67,9 @@ const MainScreen = () => {
       // Subtract the first 100 free characters and calculate the price for the remaining characters
       price += Math.ceil((letterCount - 100) / 100);
     }
-    if (model === 'gpt-4-1106-preview') {
+    console.log(model)
+    if (model == 'gpt-4-1106-preview') {
+      console.log('first')
       price += 4; // Add 5 tokens for GPT-4
     }
     return price;
@@ -82,7 +78,6 @@ const MainScreen = () => {
   useEffect(() => {
     setPrice(calculatePrice(inputValue, model));
   }, [inputValue, model, calculatePrice]);
-
 
   return (
     <View className="h-full w-full">
@@ -96,32 +91,91 @@ const MainScreen = () => {
           </ScrollView>
           <View className="bg-slate-900 flex-1 ">
             <View className="flex flex-row justify-between items-center p-2">
-              <View className="relative" style={{ display: 'flex' }}>
+              <View style={{ position: 'relative', width: '25%' }}>
                 <SelectList
-                  data={modelOptions}
-                  onSelect={handleModelChange}
                   setSelected={setModel}
-                  placeholder="Select a model"
-                  defaultOption='gpt-3.5-turbo-1106'
-                  boxStyles={{ position: 'relative', backgroundColor: 'black', borderRadius: 5, borderWidth: 1, borderColor: '#fff' }}
-                  inputStyles={{ color: 'white' }}
-                  dropdownStyles={{
-                    backgroundColor: 'black',
-                    borderRadius: 5,
-                    position: 'absolute',
-                    top: 50, // Adjust this value as needed
-                    width: 100,
-                    zIndex: 100,
+                  data={modelOptions}
+                  search={false}
+                  boxStyles={{
+                    borderRadius: 8,
+                    borderWidth: 1,
+                    borderColor: '#ccc',
+                    backgroundColor: '#16191C',
+                    padding: 0,
+                    maxWidth: 90,
+                    alignSelf: 'center',
                   }}
-                  dropdownTextStyles={{ color: 'white' }}
+                  maxHeight={150}
+                  inputStyles={{
+                    color: 'white',
+                    fontSize: 12,
+                  }}
+                  dropdownStyles={{
+                    position: 'absolute', // Set position to absolute
+                    top: '100%', // Position it right below the input box
+                    left: 0,
+                    right: 0,
+                    backgroundColor: 'gray',
+                    zIndex: 1000, // Ensure it's above other element
+                  }}
+                  dropdownItemStyles={{
+                    borderBottomWidth: 1,
+                    borderBottomColor: '#eee',
+                    margin: 3,
+                  }}
+                  dropdownTextStyles={{
+                    color: 'white',
+                    fontSize: 12,
+                  }}
+                  defaultOption={modelOptions.find(option => option.key === model)} // Find the default option based on state
                 />
+                <View className='mt-4'>
+                  <SelectList
+                    setSelected={setPrompt}
+                    data={promptOptions}
+                    search={false}
+                    boxStyles={{
+                      borderRadius: 8,
+                      borderWidth: 1,
+                      borderColor: '#ccc',
+                      backgroundColor: '#16191C',
+                      padding: 0,
+                      maxWidth: 90,
+                      alignSelf: 'center',
+                    }}
+                    maxHeight={150}
+                    inputStyles={{
+                      color: 'white',
+                      fontSize: 12,
+                    }}
+                    dropdownStyles={{
+                      position: 'absolute', // Set position to absolute
+                      top: '100%', // Position it right below the input box
+                      left: 0,
+                      right: 0,
+                      backgroundColor: 'gray',
+                      zIndex: 1000, // Ensure it's above other element
+                    }}
+                    dropdownItemStyles={{
+                      borderBottomWidth: 1,
+                      borderBottomColor: '#eee',
+                      margin: 3,
+                    }}
+                    dropdownTextStyles={{
+                      color: 'white',
+                      fontSize: 12,
+                    }}
+                    defaultOption={promptOptions.find(option => option.key === prompt)} // Find the default option based on state
+                  />
+                </View>
               </View>
+
               <TouchableOpacity className="p-3 bg-blue-600 rounded-md">
                 <Text className="text-white">Extract Text</Text>
               </TouchableOpacity>
               <View className="flex flex-row items-center">
                 <Text className="text-white">Price: </Text>
-                <Text className="text-yellow-500">1</Text>
+                <Text className="text-yellow-500">{price}</Text>
                 <Image source={coin} className='w-4 h-4' alt="add" />
               </View>
             </View>

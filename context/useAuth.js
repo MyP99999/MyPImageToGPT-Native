@@ -17,16 +17,13 @@ export const isTokenExpired = (token) => {
 };
 
 export async function refreshAccessToken(refreshToken) {
-  console.log("first")
   try {
     const response = await axiosInstance.post(
       '/api/auth/refresh-token?refreshToken=' + refreshToken
     );
     const { token } = response.data;
     await AsyncStorage.setItem('accessToken', token);
-    console.log("first2");
-    // const userData = jwtDecode(token);
-    // setUser(userData); // Update the user state with the new token data
+ 
     return token;
   } catch (error) {
     console.log('eroare')
