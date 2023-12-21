@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Image, TextInput } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView, Image, TextInput, Button } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '../context/useAuth'
 import Navbar from '../components/Navbar'
@@ -9,7 +9,9 @@ import { SelectList } from 'react-native-dropdown-select-list'
 import { useTokens } from '../context/useTokens'
 import axiosInstance, { refreshAccessToken } from '../api/axios'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-
+import * as ImagePicker from 'expo-image-picker';
+import * as Permissions from 'expo-permissions';
+import RNTesseractOcr from 'react-native-tesseract-ocr';
 
 const MainScreen = () => {
   const [inputValue, setInputValue] = useState('')
@@ -20,6 +22,7 @@ const MainScreen = () => {
   const { open, fetchHistory } = useHistory()
   const { user, checkToken } = useAuth();
   const { tokens, spendTokens } = useTokens()
+  const [image, setImage] = useState('')
 
   const modelOptions = [
     { key: 'gpt-3.5-turbo-1106', value: 'gpt-3.5' },
@@ -35,7 +38,6 @@ const MainScreen = () => {
     setResult('');
     if (tokens >= price) {
       // setLoading(true);
-      console.log(model)
       try {
         const response = await axiosInstance.get('/bot/chat', {
           params: {
@@ -67,9 +69,7 @@ const MainScreen = () => {
       // Subtract the first 100 free characters and calculate the price for the remaining characters
       price += Math.ceil((letterCount - 100) / 100);
     }
-    console.log(model)
     if (model == 'gpt-4-1106-preview') {
-      console.log('first')
       price += 4; // Add 5 tokens for GPT-4
     }
     return price;
@@ -78,6 +78,70 @@ const MainScreen = () => {
   useEffect(() => {
     setPrice(calculatePrice(inputValue, model));
   }, [inputValue, model, calculatePrice]);
+
+  const getPermissionAsync = async () => {
+    // Camera roll permissions
+    const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+    if (status !== 'granted') {
+      alert('Sorry, we need camera roll permissions to make this work!');
+    }
+  };
+
+  const pickImage = async () => {
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+
+      let img = result.assets[0].uri
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setImage(img); // Correctly accessing the URI from the assets array
+      }
+    } catch (E) {
+      console.log(E);
+    }
+  };
+
+  const takeImage = async () => {
+    try {
+      let result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        console.log(result.uri);
+        // You can setState here to display the image or use the image URI as needed
+      }
+    } catch (E) {
+      console.log(E);
+    }
+  };
+
+  const tessOptions = {
+    whitelist: null,  // Add any Tesseract options you need
+    blacklist: null
+  };
+
+  const recognizeTextFromImage = async () => {
+    try {
+      console.log(image)
+      if (image) {
+
+        const recognizedText = await RNTesseractOcr.recognize(image, RNTesseractOcr.LANG_ENGLISH, tessOptions);
+        console.log('OCR Result: ', recognizedText);
+        // Process the recognized text as needed
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <View className="h-full w-full">
@@ -169,9 +233,13 @@ const MainScreen = () => {
                   />
                 </View>
               </View>
+              <View className='w-24'>
+                <Button title="Pick an image from camera roll" onPress={pickImage} />
+                <Button title="Take a photo" onPress={takeImage} />
+              </View>
 
               <TouchableOpacity className="p-3 bg-blue-600 rounded-md">
-                <Text className="text-white">Extract Text</Text>
+                <Text className="text-white" onPress={recognizeTextFromImage}>Extract Text</Text>
               </TouchableOpacity>
               <View className="flex flex-row items-center">
                 <Text className="text-white">Price: </Text>

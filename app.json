@@ -36,7 +36,14 @@
       }
     },
     "plugins": [
-      "@react-native-google-signin/google-signin"
+      "@react-native-google-signin/google-signin",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let the app to read the text."
+        }
+      ],
+      "react-native-tesseract-ocr"
     ],
     "permissions": [
       "INTERNET"

@@ -10,24 +10,47 @@ const ForgotPassScreen = () => {
     const [email, setEmail] = useState('');
     const fadeAnim = new Animated.Value(0); // Initial value for opacity: 0
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        console.log(email)
+    const handleSubmit = async () => {
+        console.log(email);
         try {
-            const response = await axiosInstance.post(`/api/auth/forgot-password?email=${email}`)
-
-            console.log(response)
-            if (response.status === 200 || response.status === 201) { // Check for successful response status
-                alert("You have received an email to reset your password!")
-            } else {
-                // Handle errors, show messages to user
-                console.error('Registration failed');
+            const response = await axiosInstance.post(`/api/auth/forgot-password?email=${email}`);
+    
+            // Check for successful response status
+            if (response.status === 200 || response.status === 201) {
+                alert("You have received an email to reset your password!");
             }
         } catch (error) {
-            console.error('Registration error:', error);
-            alert('An error occurred during reseting.');
+    
+            // Check if the error response has data and a status
+            if (error.response && error.response.data && error.response.status) {
+                const errorMessage = error.response.data.message || "An error occurred during resetting.";
+                const statusCode = error.response.status;
+    
+                // Handle specific status codes
+                switch (statusCode) {
+                    case 400: // Bad Request
+                        alert(errorMessage);
+                        break;
+                    case 404: // Not Found
+                        alert("User not found.");
+                        break;
+                    case 409: // Conflict or similar
+                        alert(errorMessage);
+                        break;
+                    case 500: // Internal Server Error
+                        alert("Server error, please try again later.");
+                        break;
+                    default:
+                        alert(errorMessage);
+                        break;
+                }
+            } else {
+                // Fallback error message if the response structure is not as expected
+                alert("An unexpected error occurred. Please try again.");
+            }
         }
     };
+    
 
     useEffect(() => {
         Animated.timing(
@@ -62,7 +85,7 @@ const ForgotPassScreen = () => {
                         placeholder="Enter your email"
                         placeholderTextColor="#ccc"
                         value={email}
-                        onChangeText={setEmail}
+                        onChangeText={(newEmail) => setEmail(newEmail)}
                     />
                     <TouchableOpacity className="bg-blue-500 rounded-xl w-full" onPress={handleSubmit}>
                         <Text className="text-lg text-white p-4 text-center">Submit</Text>
