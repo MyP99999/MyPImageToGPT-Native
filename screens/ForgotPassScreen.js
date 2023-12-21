@@ -3,17 +3,32 @@ import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome'; // Import Icon
+import axiosInstance from '../api/axios';
 
 const ForgotPassScreen = () => {
     const navigate = useNavigation()
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const fadeAnim = new Animated.Value(0); // Initial value for opacity: 0
 
-    const handleLogin = () => {
-        // Implement your login logic here
-        console.log('Email: ', email, 'Password: ', password);
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        console.log(email)
+        try {
+            const response = await axiosInstance.post(`/api/auth/forgot-password?email=${email}`)
+
+            console.log(response)
+            if (response.status === 200 || response.status === 201) { // Check for successful response status
+                alert("You have received an email to reset your password!")
+            } else {
+                // Handle errors, show messages to user
+                console.error('Registration failed');
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+            alert('An error occurred during reseting.');
+        }
     };
+
     useEffect(() => {
         Animated.timing(
             fadeAnim,
@@ -49,7 +64,7 @@ const ForgotPassScreen = () => {
                         value={email}
                         onChangeText={setEmail}
                     />
-                    <TouchableOpacity className="bg-blue-500 rounded-xl w-full">
+                    <TouchableOpacity className="bg-blue-500 rounded-xl w-full" onPress={handleSubmit}>
                         <Text className="text-lg text-white p-4 text-center">Submit</Text>
                     </TouchableOpacity>
                 </View>
