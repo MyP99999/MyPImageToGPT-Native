@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Image, TextInput, Button } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView, Image, TextInput, Button, KeyboardAvoidingView, Platform } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '../context/useAuth'
 import Navbar from '../components/Navbar'
@@ -23,6 +23,9 @@ const MainScreen = () => {
   const { user, checkToken } = useAuth();
   const { tokens, spendTokens } = useTokens()
   const [image, setImage] = useState('')
+  const [imageLoading, setImageLoading] = useState(false)
+  const [ocrLoading, setOcrLoading] = useState(false)
+  const [resultLoading, setResultLoading] = useState(false)
 
   const modelOptions = [
     { key: 'gpt-3.5-turbo-1106', value: 'gpt-3.5' },
@@ -35,6 +38,7 @@ const MainScreen = () => {
 
   async function handleSubmit() {
     await checkToken();
+    setResultLoading(true)
     setResult('');
     if (tokens >= price) {
       // setLoading(true);
@@ -48,10 +52,10 @@ const MainScreen = () => {
           }
         });
         const data = response.data.toString();
+        setResultLoading(false)
         setResult(data);
         setInputValue('');
         fetchHistory()
-        // setSelectedImage(null)
         spendTokens(price)
       } catch (error) {
         console.error(error);
@@ -79,15 +83,9 @@ const MainScreen = () => {
     setPrice(calculatePrice(inputValue, model));
   }, [inputValue, model, calculatePrice]);
 
-  const getPermissionAsync = async () => {
-    // Camera roll permissions
-    const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-    if (status !== 'granted') {
-      alert('Sorry, we need camera roll permissions to make this work!');
-    }
-  };
-
   const pickImage = async () => {
+    setImage('')
+    setImageLoading(true)
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -100,6 +98,9 @@ const MainScreen = () => {
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         setImage(img); // Correctly accessing the URI from the assets array
+        console.log("uploaded")
+        setImageLoading(false)
+
       }
     } catch (E) {
       console.log(E);
@@ -107,6 +108,9 @@ const MainScreen = () => {
   };
 
   const takeImage = async () => {
+    setImage('')
+    setImageLoading(true)
+
     try {
       let result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -115,45 +119,57 @@ const MainScreen = () => {
         quality: 1,
       });
 
-      if (!result.canceled) {
-        console.log(result.uri);
-        // You can setState here to display the image or use the image URI as needed
+      let img = result.assets[0].uri
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setImage(img); // Correctly accessing the URI from the assets array
+        console.log("uploaded")
+        setImageLoading(false)
+
       }
     } catch (E) {
       console.log(E);
     }
   };
 
-  const tessOptions = {
-    whitelist: null,  // Add any Tesseract options you need
-    blacklist: null
-  };
 
-  const recognizeTextFromImage = async () => {
+  const doOCR = async () => {
+    setOcrLoading(true)
+
+    const formData = new FormData();
+    formData.append('file', {
+      uri: image,
+      type: 'image/jpeg', // or the correct type of your image
+      name: 'upload.jpg',
+    });
+
     try {
-      console.log(image)
-      if (image) {
-
-        const recognizedText = await RNTesseractOcr.recognize(image, RNTesseractOcr.LANG_ENGLISH, tessOptions);
-        console.log('OCR Result: ', recognizedText);
-        // Process the recognized text as needed
-      }
-    } catch (err) {
-      console.error(err);
+      const response = await axiosInstance.post('/ocr', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      setOcrLoading(false)
+      setInputValue(response.data)
+    } catch (error) {
+      console.error(error);
     }
   };
 
+
   return (
-    <View className="h-full w-full">
+    <View
+      className="h-full w-full"
+    >
       <Navbar />
       {open ? (
         <History />
       ) : (
         <View className="flex-1 bg-slate-800">
           <ScrollView className="bg-slate-500 flex-1 p-3">
-            <Text className="text-white text-lg">{result}</Text>
+            <Text className="text-white text-lg">{resultLoading ? 'Loading..' : result}</Text>
           </ScrollView>
-          <View className="bg-slate-900 flex-1 ">
+          <View className="bg-slate-900 flex-1 justify-center ">
             <View className="flex flex-row justify-between items-center p-2">
               <View style={{ position: 'relative', width: '25%' }}>
                 <SelectList
@@ -193,7 +209,7 @@ const MainScreen = () => {
                   }}
                   defaultOption={modelOptions.find(option => option.key === model)} // Find the default option based on state
                 />
-                <View className='mt-4'>
+                <View className='mt-2 hidden'>
                   <SelectList
                     setSelected={setPrompt}
                     data={promptOptions}
@@ -233,13 +249,13 @@ const MainScreen = () => {
                   />
                 </View>
               </View>
-              <View className='w-24'>
+              <View className='flex flex-row w-8 h-8'>
                 <Button title="Pick an image from camera roll" onPress={pickImage} />
                 <Button title="Take a photo" onPress={takeImage} />
               </View>
 
               <TouchableOpacity className="p-3 bg-blue-600 rounded-md">
-                <Text className="text-white" onPress={recognizeTextFromImage}>Extract Text</Text>
+                <Text className="text-white" onPress={doOCR}>Extract Text</Text>
               </TouchableOpacity>
               <View className="flex flex-row items-center">
                 <Text className="text-white">Price: </Text>
@@ -247,23 +263,24 @@ const MainScreen = () => {
                 <Image source={coin} className='w-4 h-4' alt="add" />
               </View>
             </View>
-            <View className="flex-1 border-2 mt-8 mx-2 border-gray-700 bg-gray-700 rounded-lg">
+            <View className="flex-1  mt-2 mx-2  bg-gray-700 rounded-lg p-2">
               <TextInput
                 value={inputValue}
+                placeholder={ocrLoading ? 'Loading...' : 'Enter your prompt or extract it from a photo'}
                 onChangeText={setInputValue}
-                className="h-full w-full text-white font-semibold p-2"
+                className="h-full w-full text-white font-semibold"
                 textAlignVertical="top"
                 multiline
               />
             </View>
-            <TouchableOpacity className="bg-blue-600 w-1/3 mx-auto my-3 p-2 rounded-md" onPress={handleSubmit}>
+            <TouchableOpacity disabled={imageLoading || ocrLoading} className="bg-blue-600 mx-auto my-3 p-2 rounded-md" onPress={handleSubmit}>
               <Text className='text-center text-white'>Resolve</Text>
             </TouchableOpacity>
           </View>
         </View>
       )
       }
-    </View >
+    </View>
   )
 }
 

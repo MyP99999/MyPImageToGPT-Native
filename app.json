@@ -42,8 +42,7 @@
         {
           "photosPermission": "The app accesses your photos to let the app to read the text."
         }
-      ],
-      "react-native-tesseract-ocr"
+      ]
     ],
     "permissions": [
       "INTERNET"
