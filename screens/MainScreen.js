@@ -1,17 +1,16 @@
-import { View, Text, TouchableOpacity, ScrollView, Image, TextInput, Button, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView, Image, TextInput, Button } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '../context/useAuth'
 import Navbar from '../components/Navbar'
 import { useHistory } from '../context/useHistory'
 import History from '../components/History'
-import coin from "../assets/coin.png"
 import { SelectList } from 'react-native-dropdown-select-list'
+import coin from "../assets/coin.png"
+import addphoto from "../assets/addimage.png"
+import takephoto from "../assets/takephoto.png"
 import { useTokens } from '../context/useTokens'
 import axiosInstance, { refreshAccessToken } from '../api/axios'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as ImagePicker from 'expo-image-picker';
-import * as Permissions from 'expo-permissions';
-import RNTesseractOcr from 'react-native-tesseract-ocr';
 
 const MainScreen = () => {
   const [inputValue, setInputValue] = useState('')
@@ -26,6 +25,7 @@ const MainScreen = () => {
   const [imageLoading, setImageLoading] = useState(false)
   const [ocrLoading, setOcrLoading] = useState(false)
   const [resultLoading, setResultLoading] = useState(false)
+  const [isChecked, setIsChecked] = useState(false)
 
   const modelOptions = [
     { key: 'gpt-3.5-turbo-1106', value: 'gpt-3.5' },
@@ -156,6 +156,10 @@ const MainScreen = () => {
     }
   };
 
+  const toggleCheckbox = () => {
+    setIsChecked(!isChecked);
+  }
+
 
   return (
     <View
@@ -249,24 +253,56 @@ const MainScreen = () => {
                   />
                 </View>
               </View>
-              <View className='flex flex-row w-8 h-8'>
-                <Button title="Pick an image from camera roll" onPress={pickImage} />
-                <Button title="Take a photo" onPress={takeImage} />
-              </View>
+              <View className='flex justify-center items-center'>
 
-              <TouchableOpacity className="p-3 bg-blue-600 rounded-md">
-                <Text className="text-white" onPress={doOCR}>Extract Text</Text>
-              </TouchableOpacity>
-              <View className="flex flex-row items-center">
+                <View className='flex flex-row w-8 h-8 gap-1 justify-center'>
+                  <TouchableOpacity onPress={pickImage}>
+                    <Image source={addphoto} alt="add" className='w-7 h-7' />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={takeImage}>
+                    <Image source={takephoto} alt="add" className='w-7 h-7' />
+                  </TouchableOpacity>
+                </View>
+
+                <TouchableOpacity className="p-3 bg-blue-600 rounded-md w-full">
+                  <Text className="text-white" onPress={doOCR}>Extract Text</Text>
+                </TouchableOpacity>
+                {/* Checkbox Input */}
+                <TouchableOpacity onPress={toggleCheckbox} className="mt-3">
+                  <View className="flex flex-row items-center">
+                    <View style={{
+                      width: 20,
+                      height: 20,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      borderWidth: 1,
+                      borderColor: '#000',
+                      backgroundColor: isChecked ? '#000' : '#FFF',
+                      marginRight: 8,
+                    }}>
+                      {isChecked ? (
+                        <Text style={{ color: 'white' }}>✓</Text>
+                      ) : (
+                        <Text style={{ color: 'black' }}>X</Text>
+                      )}
+                    </View>
+                    <Text className='text-white'>Complex OCR</Text>
+                  </View>
+                </TouchableOpacity>
+
+
+              </View>
+              <View className="flex flex-row j items-center w-1/4">
                 <Text className="text-white">Price: </Text>
-                <Text className="text-yellow-500">{price}</Text>
+                <Text className="text-yellow-500 mr-1">{price}</Text>
                 <Image source={coin} className='w-4 h-4' alt="add" />
               </View>
             </View>
-            <View className="flex-1  mt-2 mx-2  bg-gray-700 rounded-lg p-2">
+            <View className="flex-1  mt-2 mx-2  bg-gray-600 rounded-lg p-2">
               <TextInput
                 value={inputValue}
                 placeholder={ocrLoading ? 'Loading...' : 'Enter your prompt or extract it from a photo'}
+                placeholderTextColor="#C0C0C0"
                 onChangeText={setInputValue}
                 className="h-full w-full text-white font-semibold"
                 textAlignVertical="top"
