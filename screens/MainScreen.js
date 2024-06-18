@@ -26,7 +26,7 @@ const MainScreen = () => {
   const [ocrLoading, setOcrLoading] = useState(false)
   const [resultLoading, setResultLoading] = useState(false)
   const [isChecked, setIsChecked] = useState(false)
-
+console.log(image)
   const modelOptions = [
     { key: 'gpt-3.5-turbo-1106', value: 'gpt-3.5' },
     { key: 'gpt-4-1106-preview', value: 'gpt-4' },
@@ -43,13 +43,11 @@ const MainScreen = () => {
     if (tokens >= price) {
       // setLoading(true);
       try {
-        const response = await axiosInstance.get('/bot/chat', {
-          params: {
-            prompt: inputValue,
-            userId: user.id,
-            price: price,
-            model: model,
-          }
+        const response = await axiosInstance.post('/bot/chat', {
+          prompt: inputValue,
+          userId: user.id,
+          price: price,
+          model: model,
         });
         const data = response.data.toString();
         setResultLoading(false)
@@ -120,6 +118,8 @@ const MainScreen = () => {
       });
 
       let img = result.assets[0].uri
+      console.log(result)
+      console.log(img)
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         setImage(img); // Correctly accessing the URI from the assets array
@@ -135,7 +135,7 @@ const MainScreen = () => {
 
   const doOCR = async () => {
     setOcrLoading(true)
-
+    console.log(image)
     const formData = new FormData();
     formData.append('file', {
       uri: image,
@@ -259,16 +259,16 @@ const MainScreen = () => {
                   <TouchableOpacity onPress={pickImage}>
                     <Image source={addphoto} alt="add" className='w-7 h-7' />
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={takeImage}>
+                  {/* <TouchableOpacity onPress={takeImage}>
                     <Image source={takephoto} alt="add" className='w-7 h-7' />
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                 </View>
 
                 <TouchableOpacity className="p-3 bg-blue-600 rounded-md w-full">
                   <Text className="text-white" onPress={doOCR}>Extract Text</Text>
                 </TouchableOpacity>
                 {/* Checkbox Input */}
-                <TouchableOpacity onPress={toggleCheckbox} className="mt-3">
+                {/* <TouchableOpacity onPress={toggleCheckbox} className="mt-3">
                   <View className="flex flex-row items-center">
                     <View style={{
                       width: 20,
@@ -288,7 +288,15 @@ const MainScreen = () => {
                     </View>
                     <Text className='text-white'>Complex OCR</Text>
                   </View>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
+                {image &&
+                  <View>
+                    <Text className="text-green-400 text-center">Uploaded!</Text>
+                    <TouchableOpacity className="w-4 mx-auto" onPress={() => setImage('')}>
+                      <Text className="text-center text-white bg-red-500">X</Text>
+                    </TouchableOpacity>
+                  </View>
+                }
 
 
               </View>

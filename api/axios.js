@@ -3,7 +3,7 @@ import axios from 'axios';
 // import { isTokenExpired, refreshAccessToken } from '../context/useAuth'; // Correct path
 
 const axiosInstance = axios.create({
-  baseURL: 'http://192.168.1.9:8080', // Backend base URL
+  baseURL: 'http://192.168.236.11:8080', // Backend base URL
 });
 
 
